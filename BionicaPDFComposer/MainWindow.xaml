@@ -1,0 +1,53 @@
+﻿<Window x:Class="BionicaPDFComposer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BionicaPDFComposer"
+        xmlns:localCommand="clr-namespace:BionicaPDFComposer.Commands"
+        xmlns:localCommandVm="clr-namespace:BionicaPDFComposer.ViewModels"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="527.096" Width="601.496">
+    <!--Window.CommandBindings>
+        <CommandBinding Command="localCommandVm:PdfComposerVM.ComposeCommand" Executed="PdfComposerVM.ComposeCommand"/>
+        <CommandBinding Command="localCommand:MainWindowCommands.AddFile" Executed="AddFile_Executed"/>
+        <CommandBinding Command="localCommand:MainWindowCommands.DeleteFile" Executed="DeleteFile_Executed"/>
+    </-->
+    <Window.Resources>
+        <Style TargetType="ListViewItem">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="FontWeight" Value="Bold" />
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="FontWeight" Value="Bold" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <Window.DataContext>
+        <localCommandVm:PdfComposerVM x:Name="composerVM" />
+    </Window.DataContext>
+    <Grid Margin="0,0,2,0">
+        <GroupBox x:Name="groupBox" Header="Список файлов для композиции" Margin="10,0,10,59">
+            <local:SelectionResetListView x:Name="mylistView" Margin="0,0,0,0" ItemsSource="{Binding Path=PagesVM}" SelectedIndex="{Binding Path=SelectedIndex}">
+                <local:SelectionResetListView.ContextMenu >
+                    <ContextMenu >
+                        <MenuItem Header="Добавить в список" Command="{Binding Path=AddFileCommand}" CommandParameter="{Binding SelectedIndex}"/>
+                        <MenuItem Header="Удалить из списка" Command="{Binding Path=DeleteFileCommand}" CommandParameter="{Binding SelectedIndex}"/>
+                    </ContextMenu>
+                </local:SelectionResetListView.ContextMenu>
+                <local:SelectionResetListView.View>
+                    <GridView>
+                        <GridViewColumn Header="№" Width="40" DisplayMemberBinding="{Binding PageRange}"/>
+                        <GridViewColumn Header="Файл" Width="430" DisplayMemberBinding="{Binding FilePath}"/>
+                        <GridViewColumn Header="С" Width="40" DisplayMemberBinding="{Binding FirstPage}"/>
+                        <GridViewColumn Header="По" Width="40" DisplayMemberBinding="{Binding LastPage}"/>
+                    </GridView>
+                </local:SelectionResetListView.View>
+            </local:SelectionResetListView>
+        </GroupBox>
+        <Button x:Name="button" HorizontalAlignment="Center" Content="Объединить страницы" Margin="227,0,217,22" Command="{Binding Path=ComposeCommand}" VerticalAlignment="Bottom" Width="147" />
+
+    </Grid>
+</Window>
