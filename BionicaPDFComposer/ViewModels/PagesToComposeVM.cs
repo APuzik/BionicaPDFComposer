@@ -1,5 +1,6 @@
 ﻿using PDFComposer;
 using System.ComponentModel;
+using System.Windows;
 
 namespace BionicaPDFComposer.ViewModels
 {
@@ -23,7 +24,7 @@ namespace BionicaPDFComposer.ViewModels
         public int LastPage
         {
             get { return PageToComposeModel.LastPage; }
-            set { PageToComposeModel.LastPage = value; OnPropertyChanged("EndPage"); }
+            set { PageToComposeModel.LastPage = value; OnPropertyChanged("LastPage"); }
         }
 
         public string PageRange

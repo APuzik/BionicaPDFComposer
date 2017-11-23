@@ -56,6 +56,7 @@
     </ApplicationDefinition>
     <Compile Include="SelectionResetListView.cs" />
     <Compile Include="ViewModels\PagesToComposeVM.cs" />
+    <Compile Include="ViewModels\PageValidationRule.cs" />
     <Compile Include="ViewModels\PdfComposerVM.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

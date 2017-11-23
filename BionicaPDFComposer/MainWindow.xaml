@@ -7,14 +7,14 @@
         xmlns:localCommand="clr-namespace:BionicaPDFComposer.Commands"
         xmlns:localCommandVm="clr-namespace:BionicaPDFComposer.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="527.096" Width="601.496">
+        Title="Конструктор PDF файлов" Height="527.096" Width="752">
     <!--Window.CommandBindings>
         <CommandBinding Command="localCommandVm:PdfComposerVM.ComposeCommand" Executed="PdfComposerVM.ComposeCommand"/>
         <CommandBinding Command="localCommand:MainWindowCommands.AddFile" Executed="AddFile_Executed"/>
         <CommandBinding Command="localCommand:MainWindowCommands.DeleteFile" Executed="DeleteFile_Executed"/>
     </-->
     <Window.Resources>
-        <Style TargetType="ListViewItem">
+        <!--Style TargetType="ListViewItem">
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="FontWeight" Value="Bold" />
@@ -23,31 +23,126 @@
                     <Setter Property="FontWeight" Value="Bold" />
                 </Trigger>
             </Style.Triggers>
+        </-->
+        <ControlTemplate x:Key="validationTemplate">
+            <DockPanel>
+                <TextBlock Foreground="Red" FontSize="20">!</TextBlock>
+                <AdornedElementPlaceholder/>
+            </DockPanel>
+        </ControlTemplate>
+        <Style x:Key="textBoxInError" TargetType="{x:Type TextBox}">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={x:Static RelativeSource.Self},
+                        Path=(Validation.Errors).CurrentItem.ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
+        <Style TargetType="ListView">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <VisualBrush Stretch="None">
+                        <VisualBrush.Visual>
+                            <TextBlock Text="Нажмите здесь правой кнопкой мыши, чтобы добавить файлы" />
+                        </VisualBrush.Visual>
+                    </VisualBrush>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="SelectedIndex" Value="-1">
+                    <Setter Property="ContextMenu" Value="{x:Null}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
     </Window.Resources>
+
     <Window.DataContext>
         <localCommandVm:PdfComposerVM x:Name="composerVM" />
     </Window.DataContext>
     <Grid Margin="0,0,2,0">
-        <GroupBox x:Name="groupBox" Header="Список файлов для композиции" Margin="10,0,10,59">
-            <local:SelectionResetListView x:Name="mylistView" Margin="0,0,0,0" ItemsSource="{Binding Path=PagesVM}" SelectedIndex="{Binding Path=SelectedIndex}">
-                <local:SelectionResetListView.ContextMenu >
-                    <ContextMenu >
-                        <MenuItem Header="Добавить в список" Command="{Binding Path=AddFileCommand}" CommandParameter="{Binding SelectedIndex}"/>
-                        <MenuItem Header="Удалить из списка" Command="{Binding Path=DeleteFileCommand}" CommandParameter="{Binding SelectedIndex}"/>
+        <GroupBox x:Name="groupBox" Header="Список файлов для композиции" Margin="0,0,0,59">
+            <ListView x:Name="mylistView" Margin="0,0,0,0" AlternationCount="2" ItemsSource="{Binding Path=PagesVM}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" SelectedIndex="{Binding Path=SelectedIndex}">
+                <ListView.ContextMenu >
+                    <ContextMenu>
+                        <MenuItem Header="Добавить файл" Command="{Binding Path=AddFileCommand}" CommandParameter="{Binding SelectedIndex}"/>
+                        <MenuItem Header="Удалить файл" Command="{Binding Path=DeleteFileCommand}" CommandParameter="{Binding SelectedIndex}"/>
                     </ContextMenu>
-                </local:SelectionResetListView.ContextMenu>
-                <local:SelectionResetListView.View>
-                    <GridView>
-                        <GridViewColumn Header="№" Width="40" DisplayMemberBinding="{Binding PageRange}"/>
-                        <GridViewColumn Header="Файл" Width="430" DisplayMemberBinding="{Binding FilePath}"/>
-                        <GridViewColumn Header="С" Width="40" DisplayMemberBinding="{Binding FirstPage}"/>
-                        <GridViewColumn Header="По" Width="40" DisplayMemberBinding="{Binding LastPage}"/>
-                    </GridView>
-                </local:SelectionResetListView.View>
-            </local:SelectionResetListView>
-        </GroupBox>
-        <Button x:Name="button" HorizontalAlignment="Center" Content="Объединить страницы" Margin="227,0,217,22" Command="{Binding Path=ComposeCommand}" VerticalAlignment="Bottom" Width="147" />
+                </ListView.ContextMenu>
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <!--Setter Property="ContextMenu">
+                            <Setter.Value>
+                                <ContextMenu>
+                                    <MenuItem Header="Добавить файл перед этим" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataConeAddFileCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.SelectedIndex}"/>
+                                    <MenuItem Header="Удалить файл" Command="{Binding Path=DataContext.DeleteFileCommand}" CommandParameter="{Binding DataContext.SelectedIndex}"/>
+                                </ContextMenu>
+                            </Setter.Value>
+                        </-->
+                        <Style.Triggers>
+                            <Trigger Property="ItemsControl.AlternationIndex"  Value="0">
+                                <Setter Property="Background" Value="LightGray" />
+                            </Trigger>
+                            <!--Trigger Property="ItemsControl.AlternationIndex"  Value="1">
+                                <Setter Property="Background" Value="LightGray" />
+                            </-->
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
 
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="№ страниц" Width="80" DisplayMemberBinding="{Binding PageRange}"/>
+                        <GridViewColumn Header="Файл" Width="400" DisplayMemberBinding="{Binding FilePath}"/>
+                        <GridViewColumn Header="Первая страница" Width="120">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Style="{StaticResource textBoxInError}" LostFocus="TextBox_LostFocus">
+                                        <TextBox.Resources>
+                                            <localCommandVm:BindingProxy x:Key="proxy" Data="{Binding}"/>
+                                        </TextBox.Resources>
+                                        <TextBox.Text>
+                                            <Binding Path="FirstPage" Mode="TwoWay" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged">
+                                                <Binding.ValidationRules>
+                                                    <localCommandVm:PageValidationRule >
+                                                        <localCommandVm:PageValidationRule.Wrapper>
+                                                            <localCommandVm:Wrapper PageData="{Binding Path=Data, Source={StaticResource proxy}}" MinValue="1" MaxValue="{Binding Path=Data.LastPage, Source={StaticResource proxy}}"/>
+                                                        </localCommandVm:PageValidationRule.Wrapper>
+                                                    </localCommandVm:PageValidationRule>
+                                                </Binding.ValidationRules>
+                                            </Binding>
+                                        </TextBox.Text>
+                                    </TextBox>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Последняя страница" Width="120" >
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Style="{StaticResource textBoxInError}" LostFocus="TextBox_LostFocus">
+                                        <TextBox.Resources>
+                                            <localCommandVm:BindingProxy x:Key="proxy1" Data="{Binding}"/>
+                                        </TextBox.Resources>
+                                        <TextBox.Text>
+                                            <Binding Path="LastPage" Mode="TwoWay" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged">
+                                                <Binding.ValidationRules>
+                                                    <localCommandVm:PageValidationRule >
+                                                        <localCommandVm:PageValidationRule.Wrapper>
+                                                            <localCommandVm:Wrapper MinValue="{Binding Path=Data.FirstPage, Source={StaticResource proxy1}}" />
+                                                        </localCommandVm:PageValidationRule.Wrapper>
+                                                    </localCommandVm:PageValidationRule>
+                                                </Binding.ValidationRules>
+                                            </Binding>
+                                        </TextBox.Text>
+                                    </TextBox>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </GroupBox>
+        <Button x:Name="button" Content="Объединить страницы" Margin="0,0,0,20" Command="{Binding Path=ComposeCommand}" VerticalAlignment="Bottom" Width="140" />
     </Grid>
 </Window>

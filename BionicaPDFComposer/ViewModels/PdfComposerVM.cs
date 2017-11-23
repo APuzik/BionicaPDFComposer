@@ -1,8 +1,10 @@
 ﻿using BionicaPDFComposer.Commands;
 using Microsoft.Win32;
 using PDFComposer;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 
 namespace BionicaPDFComposer.ViewModels
@@ -14,6 +16,7 @@ namespace BionicaPDFComposer.ViewModels
             ComposeCommand = new RelayCommand { ExecuteAction = ComposePages };
             AddFileCommand = new RelayCommand { ExecuteAction = AddFile };
             DeleteFileCommand = new RelayCommand { ExecuteAction = DeleteFile };
+
         }
 
         public ICommand ComposeCommand { get; set; }
@@ -21,10 +24,17 @@ namespace BionicaPDFComposer.ViewModels
         public ICommand DeleteFileCommand { get; set; }
 
         public ObservableCollection<PagesToComposeVM> PagesVM { get; set; } = new ObservableCollection<PagesToComposeVM>();
+        
         public PagesToComposeVM SelectedItem { get; set; } = null;
         public int SelectedIndex { get; set; } = -1;
 
         public List<PagesToCompose> PagesModel { get; private set; } = new List<PagesToCompose>();
+
+
+        void UpdateNumbers(object sender, EventArgs e)
+        {
+            UpdateOutputPageNumbers();
+        }
 
         public void UpdateOutputPageNumbers()
         {
@@ -39,24 +49,50 @@ namespace BionicaPDFComposer.ViewModels
 
         public void ComposePages(object parameter)
         {
-            PdfComposer composer = new PdfComposer();
-            composer.ComposePages(@"D:\Projects\BionicaPDFComposer\Test\result.pdf", PagesModel);
+            try
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = @"PDF files (*.pdf)|*.pdf";
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    PdfComposer composer = new PdfComposer();
+                    composer.ComposePages(saveFileDialog.FileName, PagesModel);
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show($"Невозможно извлечь страницы. Ошбика:\r\n{ex.Message}");
+            }
         }
 
         public void AddFile(object parameter)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = @"PDF files (*.pdf)|*.pdf";
-            if (openFileDialog.ShowDialog() == true)
+            try
             {
-                int index = SelectedIndex;
-                if (index < 0)
-                    index = PagesVM.Count;
-                PagesVM.Insert(index, new PagesToComposeVM(new PagesToCompose { FilePath = openFileDialog.FileName, FirstPage = 1, LastPage = 1 }));
-                UpdateOutputPageNumbers();
-                SelectedIndex = -1;
-            }
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = @"PDF files (*.pdf)|*.pdf";
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    if (!docPages.ContainsKey(openFileDialog.FileName))
+                    {
+                        docPages.Add(openFileDialog.FileName, new PdfDoc { DocPath = openFileDialog.FileName });
+                    }
 
+                    int index = SelectedIndex;
+                    if (index < 0)
+                        index = PagesVM.Count;
+
+                    PagesModel.Insert(index, new PagesToCompose { FilePath = openFileDialog.FileName, FirstPage = 1, LastPage = docPages[openFileDialog.FileName].PageCount });
+                    PagesVM.Insert(index, new PagesToComposeVM(PagesModel[index]));
+
+                    UpdateOutputPageNumbers();
+                    SelectedIndex = -1;
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show($"Невозможно добавить файл. Скорее всего файл поврежден. Ошбика:\r\n{ex.Message}");
+            }
         }
 
         public void DeleteFile(object parameter)
@@ -67,5 +103,7 @@ namespace BionicaPDFComposer.ViewModels
                 UpdateOutputPageNumbers();
             }
         }
+
+        Dictionary<string, PdfDoc> docPages = new Dictionary<string, PdfDoc>();
     }
 }
