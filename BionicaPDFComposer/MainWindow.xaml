@@ -38,12 +38,12 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style TargetType="ListView">
+        <Style TargetType="local:SelectionResetListView">
             <Setter Property="Background">
                 <Setter.Value>
                     <VisualBrush Stretch="None">
                         <VisualBrush.Visual>
-                            <TextBlock Text="Нажмите здесь правой кнопкой мыши, чтобы добавить файлы" />
+                            <TextBlock VerticalAlignment="Bottom" Text="Нажмите здесь правой кнопкой мыши, чтобы добавить файлы" />
                         </VisualBrush.Visual>
                     </VisualBrush>
                 </Setter.Value>
@@ -54,32 +54,32 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-
+        <localCommandVm:PdfComposerVM x:Key="composerVM" />
     </Window.Resources>
 
-    <Window.DataContext>
+    <!--Window.DataContext>
         <localCommandVm:PdfComposerVM x:Name="composerVM" />
-    </Window.DataContext>
+    </-->
     <Grid Margin="0,0,2,0">
         <GroupBox x:Name="groupBox" Header="Список файлов для композиции" Margin="0,0,0,59">
-            <ListView x:Name="mylistView" Margin="0,0,0,0" AlternationCount="2" ItemsSource="{Binding Path=PagesVM}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" SelectedIndex="{Binding Path=SelectedIndex}">
-                <ListView.ContextMenu >
+            <local:SelectionResetListView x:Name="mylistView" Margin="0,0,0,0" AlternationCount="2" DataContext="{StaticResource composerVM}" ItemsSource="{Binding Path=PagesVM}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" SelectedIndex="{Binding Path=SelectedIndex}">
+                <local:SelectionResetListView.ContextMenu >
                     <ContextMenu>
                         <MenuItem Header="Добавить файл" Command="{Binding Path=AddFileCommand}" CommandParameter="{Binding SelectedIndex}"/>
-                        <MenuItem Header="Удалить файл" Command="{Binding Path=DeleteFileCommand}" CommandParameter="{Binding SelectedIndex}"/>
+                        <!--MenuItem Header="Удалить файл" Command="{Binding Path=DeleteFileCommand}" CommandParameter="{Binding SelectedIndex}"/-->
                     </ContextMenu>
-                </ListView.ContextMenu>
-                <ListView.ItemContainerStyle>
+                </local:SelectionResetListView.ContextMenu>
+                <local:SelectionResetListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <!--Setter Property="ContextMenu">
+                        <Setter Property="ContextMenu">
                             <Setter.Value>
                                 <ContextMenu>
-                                    <MenuItem Header="Добавить файл перед этим" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataConeAddFileCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.SelectedIndex}"/>
-                                    <MenuItem Header="Удалить файл" Command="{Binding Path=DataContext.DeleteFileCommand}" CommandParameter="{Binding DataContext.SelectedIndex}"/>
+                                    <MenuItem Header="Добавить файл перед этим" Command="{Binding Source={StaticResource composerVM}, Path=AddFileCommand}" CommandParameter="{Binding Source={StaticResource composerVM}, Path=SelectedIndex}"/>
+                                    <MenuItem Header="Удалить файл" Command="{Binding Source={StaticResource composerVM}, Path=DeleteFileCommand}" CommandParameter="{Binding Source={StaticResource composerVM}, Path=SelectedIndex}"/>
                                 </ContextMenu>
                             </Setter.Value>
-                        </-->
+                        </Setter>
                         <Style.Triggers>
                             <Trigger Property="ItemsControl.AlternationIndex"  Value="0">
                                 <Setter Property="Background" Value="LightGray" />
@@ -89,9 +89,9 @@
                             </-->
                         </Style.Triggers>
                     </Style>
-                </ListView.ItemContainerStyle>
+                </local:SelectionResetListView.ItemContainerStyle>
 
-                <ListView.View>
+                <local:SelectionResetListView.View>
                     <GridView>
                         <GridViewColumn Header="№ страниц" Width="80" DisplayMemberBinding="{Binding PageRange}"/>
                         <GridViewColumn Header="Файл" Width="400" DisplayMemberBinding="{Binding FilePath}"/>
@@ -140,8 +140,8 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
                     </GridView>
-                </ListView.View>
-            </ListView>
+                </local:SelectionResetListView.View>
+            </local:SelectionResetListView>
         </GroupBox>
         <Button x:Name="button" Content="Объединить страницы" Margin="0,0,0,20" Command="{Binding Path=ComposeCommand}" VerticalAlignment="Bottom" Width="140" />
     </Grid>
